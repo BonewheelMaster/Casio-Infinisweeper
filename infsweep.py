@@ -1,5 +1,6 @@
 import board
 import screen
+import usrinput
 
 game_board = board.Board(12345, 5)
 game_screen = screen.Screen(21, 6)
@@ -10,7 +11,8 @@ game_screen = screen.Screen(21, 6)
 
 #	print()
 
-input()
+while True:
+	usrinput.take_input()
 
 #game_board.set_tile(5, 5, "checked: 3")
 game_board.check_tile(2, 6)
