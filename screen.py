@@ -1,12 +1,35 @@
-class Screen:
-	def __init__(self, resolution_x: int, resolution_y: int):
-		self.resolution_X = resolution_x
-		self.resolution_y = resolution_y
+"""
+The screen.
 
-		self.position_x = 0
-		self.position_y = 0
-		self.cursor_pos_x = 0
-		self.cursor_pos_y = 0
+Attributes:
+"""
+import config
+import board
 
-	def print_screen(self):
-		pass
+RESOLUTION_X = config.RESOLUTION_X
+RESOLUTION_Y = config.RESOLUTION_Y
+
+DISPLAY_MAP = config.DISPLAY_MAP
+
+CURSOR_CHAR = config.CURSOR_CHAR
+
+screen_position_x = 0
+screen_position_y = 0
+
+cursor_position_x = 0
+cursor_position_y = 0
+
+
+def update() -> None:
+	for i in range(RESOLUTION_Y):
+		for v in range(RESOLUTION_X):
+			if v == cursor_position_x and i == cursor_position_y:
+				print(CURSOR_CHAR, end="")
+				continue
+
+			print(DISPLAY_MAP[board.get_tile_state(
+				screen_position_x + v,
+				screen_position_y + i
+			)], end="")
+
+		print()
