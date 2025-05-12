@@ -14,8 +14,8 @@ import config
 SEED = config.SEED
 BOMB_CHANCE = config.BOMB_CHANCE 
 
-checked_tiles = []# TODO change both of these to sets
-flagged_tiles = []
+checked_tiles = set()
+flagged_tiles = set()
 
 debug_revealed = False # !debug
 
