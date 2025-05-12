@@ -74,7 +74,8 @@ def check_tile(position_x: int, position_y: int) -> None:
 		position_y (int): Position of the title on the y axis. Higher values
 			go down.
 	"""
-	checked_tiles.append( (position_x, position_y) )
+	if (position_x, position_y) not in flagged_tiles:
+		checked_tiles.append( (position_x, position_y) )
 
 	if is_bomb(position_x, position_y):
 		end_game()
