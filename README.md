@@ -16,7 +16,7 @@ Commands may be repeated. All will be run. E.g., entering "44444" will move the
 cursor or screen 5 tiles left.
 
 - All numbers except `0` and `5`: Move the cursor or screen in that direction.
--`5`: Flag the tile that the cursor is currently on.
+- `5`: Flag the tile that the cursor is currently on.
 - `0`: Check the tile that the cursor is currently on.
 - `.`: Switch movement mode between cursor or screen mode.
 
