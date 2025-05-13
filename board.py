@@ -54,13 +54,21 @@ def flag_tile(position_x: int, position_y: int) -> None:
 			
 		position_y (int): Position of the title on the y axis. Higher values
 			go down.
+	
+	Side effects:
+		Reads:
+			- checked_tiles
+			_ flagged_tiles
+
+		Modifies:
+			- flagged_tiles
 	"""
 	if (position_x, position_y) not in checked_tiles:
 		if (position_x, position_y) not in flagged_tiles:
-			flagged_tiles.append( (position_x, position_y) )
+			flagged_tiles.add( (position_x, position_y) )
 
 		else:
-			flagged_tiles.remove( (position_x, position_y) )
+			flagged_tiles.discard( (position_x, position_y) )
 
 
 def check_tile(position_x: int, position_y: int) -> None:
@@ -73,15 +81,22 @@ def check_tile(position_x: int, position_y: int) -> None:
 			
 		position_y (int): Position of the title on the y axis. Higher values
 			go down.
+
+	Side effects:
+		Reads:
+			- flagged_tiles
+
+		Modifies:
+			- checked_tiles
 	"""
 	if (position_x, position_y) not in flagged_tiles:
-		checked_tiles.append( (position_x, position_y) )
+		checked_tiles.add( (position_x, position_y) )
 
 	if is_bomb(position_x, position_y):
 		end_game()
 
 
-def is_bomb(position_x: int, position_y: int):
+def is_bomb(position_x: int, position_y: int) -> bool:
 	"""
 	Check if given tile is a bomb.
 
@@ -99,17 +114,13 @@ def is_bomb(position_x: int, position_y: int):
 	Return
 		bool: True if given tile is a bomb, False otherwise.
 	"""
-	random.seed( SEED + position_x )
+	random.seed( SEED + hash( (position_x, position_y) ) )
 
-	roll = random.randint(1, 50)
-
-	random.seed( SEED + position_y )
-
-	roll += random.randint(1, 50)
+	roll = random.randint(1, 100)
 	return BOMB_CHANCE >= roll
 
 
-def get_adjacent_tile_counts(position_x: int, position_y: int):
+def get_adjacent_tile_counts(position_x: int, position_y: int) -> dict:
 	"""
 	Get the counts of the eight adjacent tiles to the tile specified.
 
