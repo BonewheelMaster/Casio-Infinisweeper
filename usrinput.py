@@ -95,23 +95,6 @@ def move(offset_x: int, offset_y: int) -> None:
 		)
 
 
-def flag_tile() -> None:
-	"""
-	Flag or unflag current tile. Revealed tiles cannot be flagged.
-	"""
-	board.flag_tile(
-		screen.screen_position_x + screen.cursor_position_x,
-		screen.screen_position_y + screen.cursor_position_y
-	)
-
-
-def check_tile() -> None:
-	board.check_tile(
-		screen.screen_position_x + screen.cursor_position_x,
-		screen.screen_position_y + screen.cursor_position_y
-	)
-
-
 def toggle_movement_mode() -> None:
 	global screen_move
 	
