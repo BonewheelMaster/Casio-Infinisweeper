@@ -10,7 +10,7 @@ PCs. Keep in mind that the Casio calculators use MicroPython instead of CPython.
 ## Default Controls
 
 Due to Casio's version of Python not having a `get_key` function, the shell
-must be used. This means all commands end with pressing <exe> (<enter> on keyboards).
+must be used. This means all commands end with pressing `exe` (`enter` on keyboards).
 
 Commands may be repeated. All will be run. E.g., entering "44444" will move the
 cursor or screen 5 tiles left.
