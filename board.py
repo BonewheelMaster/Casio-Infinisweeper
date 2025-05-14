@@ -10,6 +10,7 @@ Attributes:
 """
 import random
 import config
+import utils
 
 SEED = config.SEED
 BOMB_CHANCE = config.BOMB_CHANCE 
@@ -114,7 +115,7 @@ def is_bomb(position_x: int, position_y: int) -> bool:
 	Return
 		bool: True if given tile is a bomb, False otherwise.
 	"""
-	random.seed( SEED + hash( (position_x, position_y) ) )
+	random.seed( utils.mix_seed_with_tile(SEED, position_x, position_y) )
 
 	roll = random.randint(1, 100)
 	return BOMB_CHANCE >= roll
