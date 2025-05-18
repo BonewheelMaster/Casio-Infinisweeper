@@ -1,0 +1,1 @@
+- Add auto checking when a '0' tile is uncovered.
