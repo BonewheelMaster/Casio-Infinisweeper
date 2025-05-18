@@ -6,6 +6,7 @@ Filenames are all <= 8 chars because that is the maximum on this calculator.
 
 Due to this program not using any Casio-specific modules, it can be run on desktop
 PCs. Keep in mind that the Casio calculators use MicroPython instead of CPython.
+The only modules available on the calculator are Random, Math, and CasioPlot.
 
 ## Default Controls
 
