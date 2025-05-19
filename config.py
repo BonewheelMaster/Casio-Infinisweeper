@@ -1,9 +1,12 @@
+"""
+"""
 # [SCREEN]
 # Number of characters to be displayed per line.
 RESOLUTION_X = 21
 # Number of lines to be displayed.
 RESOLUTION_Y = 6
-# Which characters should be mapped to which states.
+# Which characters should be mapped to which states. Each state should only be
+# mapped to one character.
 DISPLAY_MAP = {
 	"flagged": "F",
 	"hidden": "?",
@@ -20,3 +23,5 @@ CURSOR_CHAR = "#"
 SEED = 12345
 # Chance [0-100] for any given tile to be a bomb.
 BOMB_CHANCE = 5
+# Number of tiles to cache. 0 effectively turns caching off. One tile costs ~50B.
+CACHE_SIZE = (RESOLUTION_X * RESOLUTION_Y) + 25
