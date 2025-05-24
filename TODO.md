@@ -1,3 +1,4 @@
 - Add auto checking when a '0' tile is uncovered.
 - Add event when a bomb is uncovered.
 - Add saving/loading.
+- Add screen absolute movement.
