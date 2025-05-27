@@ -1,6 +1,7 @@
 # Casio Infinisweeper
 
-An endless minesweeper game built for the Casio fx-9750GIII (might work for other calculators too).
+An endless minesweeper game built for the Casio fx-9750GIII (might work for other
+calculators too).
 
 Filenames are all <= 8 characters because that is the maximum on this calculator.
 
@@ -10,10 +11,11 @@ The only modules available on the calculator are Random, Math, and CasioPlot.
 
 ## Default Controls
 
-Due to Casio's version of Python not having a `get_key` function, the shell
-must be used. This means all commands end with pressing `exe` (`enter` on keyboards),
-and the resolution is limited to the number of characters per line by the number of
-lines minus one (one line is used for input).
+Due to Casio's version of Python not having a `get_key` function (and therefore 
+no way to get input with a CasioPlot screen enabled), the shell must be used. 
+This means all commands end with pressing `exe` (`enter` on keyboards), and the 
+resolution is limited to the number of characters per line by the number of lines 
+minus one (one line is used for input).
 
 Any number of commands can be input. All will be run. E.g., entering "44422"
 will move the cursor or screen three tiles left and two tiles up.
@@ -25,5 +27,5 @@ will move the cursor or screen three tiles left and two tiles up.
 
 ## Config
 
-The `config.py` file contains various configuration variables; further configuration
-requires editing the source code.
+The `config.py` file contains various configuration variables; further 
+configuration requires editing the source code.
