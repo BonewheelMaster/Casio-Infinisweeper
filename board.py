@@ -1,164 +1,302 @@
-"""
-The entire worldspace.
-
-The only data that are stored are the tiles that have been flagged
-and the tiles that have been revealed. All other data (whether a
-tile is a bomb, how many bombs are around a tile, etc.) are reproducibly
-calculated via the seed.
-
-Attributes:
-"""
 import random
-import config
 import utils
 
-SEED = config.SEED
-BOMB_CHANCE = config.BOMB_CHANCE 
-
-checked_tiles = set()
-flagged_tiles = set()
-
-debug_revealed = False # !debug
-
-def get_tile_state(position_x: int, position_y: int) -> str:
+class Board:
 	"""
-	Get the state of a tile for the purpose of displaying on screen.
+	The entire worldspace.
 
-	Returns: 
-		string: One of the following:
-			- "checked: i", where i is an int [0-9]
-			- "flagged"
-			- "hidden"
+	The only data that are stored are the tiles that have been flagged
+	and the tiles that have been revealed. All other data (whether a
+	tile is a bomb, how many bombs are around a tile, etc.) are reproducibly
+	calculated via the seed.
+
+	A cache is used to store the positions of bombs currently on the screen.
+	Each bomb costs a little more than 32 bytes. The parameters (position 
+	and size) of the last screen are also stored, so that the cache is 
+	only recalculated when it changes.
+
+	Attributes:
+		SEED (int): The seed the board was initialized with.
+		BOMB_CHANCE (int): The chance for any given tile to be a bomb.
+		AUTO_UNCOVER_TILES (bool): Whether the board automatically uncovers
+			all tiles around a tile with no adjacent bombs.
+
+		game_ended (bool): If the game has ended. If True, all tiles
+			are revealed.
 	"""
-	if (position_x, position_y) in checked_tiles or debug_revealed: # !debug
-		if is_bomb(position_x, position_y):
-			return "bomb"
-			
-		return "checked: {}".format(
-			get_adjacent_tile_counts(position_x, position_y)["bombs"]
+	def __init__(
+		self, seed: int, bomb_chance: int, auto_uncover_tiles: bool
+	) -> None:
+		"""
+		Args:
+			seed: Seed to use. Different seeds produce different maps.
+			bomb_chance: The chance for any given tile to be a bomb. Value
+				should be in [1-100].
+			auto_uncover_tiles: Whether to automatically uncover all tiles around a
+				tile with no adjacent bombs.
+		"""
+		self.SEED = seed
+		self.BOMB_CHANCE = bomb_chance
+		self.AUTO_UNCOVER_TILES = auto_uncover_tiles
+
+		self.game_ended = False
+
+		# Tiles are stored in all of these as a tuple of their positions: (x, y).
+		self._checked_tiles = set()
+		self._flagged_tiles = set()
+		# Stores all bombs on the screen that last called the get_tiles function.
+		self._bomb_cache = set()
+
+		# If these do not match the screen parameters in get_tiles, the cache is
+		# recalculated and these are updated.
+		self._last_screen_position_x = 0
+		self._last_screen_position_y = 0
+		self._last_screen_resolution_x = 0
+		self._last_screen_resolution_y = 0
+
+
+	def get_tile_grid(
+		screen_position_x: int, screen_position_y: int, resolution_x: int,
+		resolution_y: int, display_map: dict
+	) -> list:
+		"""
+		Construct the tile grid for the purpose of displaying to a screen.
+
+		Args:
+			resolution_x: Amount of characters per line.
+			resolution_y: Amount of lines on the screen.
+			display_map: A mapping of states to displayable characters.
+				The keys are the states and the values are the characters.
+
+		Returns:
+			The tile grid. The lists it contains are the rows (y); the characters
+				on those rows are the columns (x). This means that to access
+				the tile (x, y), use something like `tile_grid[y][x]`.
+		"""
+		tile_grid = [
+			[display_map[("hidden")] * resolution_x] * resolution_y
+		]
+		bombs = self._get_bombs_on_screen(
+			screen_position_x, screen_position_y, resolution_x, resolution_y
 		)
+		nonzero_tiles = self_get_all_adjacent_bomb_counts(bombs)
 
-	elif (position_x, position_y) in flagged_tiles:
-		return "flagged"
+		for tile in self._checked_tiles:
+			if tile in nonzero_tiles:
+				tile_grid[tile[1]][tile[0]] = display_map[
+					"checked: {}".format(nonzero_tiles[tile])
+				]
 
-	else:
-		return "hidden"
+			elif tile in bombs:
+				tile_grid[tile[1]][tile[0]] = display_map["bomb"]
+
+			else:
+				tile_grid[tile[1]][tile[0]] = display_map["safe"]
+
+		for tile in self._flagged_tiles:
+			tile_grid[tile[1]][tile[0]] = display_map["flagged"]
+
+		if self.game_ended:
+			# Reveal all bombs, regardless of if they have been checked.
+			for tile in bombs:
+				tile_grid[tile[1]][tile[0]] = display_map["bomb"]
+
+		tile_grid = self_auto_check_tiles(tile_grid, nonzero_tiles, display_map)
+
+		return tile_grid
 
 
-def flag_tile(position_x: int, position_y: int) -> None:
-	"""
-	Flag or unflag a tile. Revealed tiles cannot be flagged.
+	def flag_tile(self, position_x: int, position_y: int) -> None:
+		"""Flag or unflag a tile. Revealed tiles cannot be flagged."""
+		if (position_x, position_y) in self._checked_tiles:
+			return
 
-	Args:
-		position_x (int): Position of the tile on the x axis. Higher values
-			go right.
-			
-		position_y (int): Position of the title on the y axis. Higher values
-			go down.
-	
-	Side effects:
-		Reads:
-			- checked_tiles
-			_ flagged_tiles
-
-		Modifies:
-			- flagged_tiles
-	"""
-	if (position_x, position_y) not in checked_tiles:
-		if (position_x, position_y) not in flagged_tiles:
-			flagged_tiles.add( (position_x, position_y) )
+		if (position_x, position_y) not in self._flagged_tiles:
+			self._flagged_tiles.add( (position_x, position_y) )
 
 		else:
-			flagged_tiles.discard( (position_x, position_y) )
+			self._flagged_tiles.discard( (position_x, position_y) )
 
 
-def check_tile(position_x: int, position_y: int) -> None:
-	"""
-	Set tile as checked, ending the game if it is a bomb.
+	def check_tile(self, position_x: int, position_y: int) -> None:
+		"""
+		Set tile as checked. Flagged tiles cannot be revealed.
 
-	Args:
-		position_x (int): Position of the tile on the x axis. Higher values
-			go right.
+		Ends the game if the revealed tile is a bomb.
+		"""
+		if (position_x, position_y) in self._flagged_tiles:
+			return
+
+		self._checked_tiles.add( (position_x, position_y) )
+
+		if (position_x, position_y) in self._bomb_cache:
+			self.end_game()
+
+
+	# def _auto_check_tiles(self, position_x: int, position_y: int) -> None:
+	# 	"""
+	# 	Uncover every tile adjacent to a safe tile.
+
+	# 	Called when a tile is checked by the user and has 0 bombs around it.
+	# 	"""
+	# 	if not self.AUTO_UNCOVER_TILES:
+	# 		return
+
+	# 	for i in range(-1, 2):
+	# 		for v in range(-1, 2):
+	# 			if (position_x + i, position_y + v) in self._checked_tiles:
+	# 				continue
+					
+	# 			self._checked_tiles.add(position_x + i, position_y + v)
+
+
+	def _auto_check_tiles(
+			self, tile_grid: list, nonzero_tiles: list, display_map: dict
+	) -> list:
+		"""
+		Automatically uncover all tiles around an uncovered safe tile.
+
+		Args:
+			tile_grid: The tile grid to modify.
+			nonzero_tiles: All tiles on the grid that aren't safe (not including bombs).
+			display_map: The map of states to characters.
+
+		Returns:
+			The new tile grid.
+		"""
+		# TODO: Consider using recursion.
+		done = False
+
+		# This is horrid. TODO: Make this better.
+		# TODO: Check performance.
+		while not done:
+			done = True
 			
-		position_y (int): Position of the title on the y axis. Higher values
-			go down.
+			for row in tile_grid:
+				for tile in row:
+					if tile != display_map["safe"]:
+						continue
+						
+					for i in range(-1, 2):
+						for v in range(-1, 2):
+							# TODO: Confirm functionality.
+							if tile_grid[row][tile] == display_map["hidden"]:
+								tile_grid[row][tile] = display_map["safe"]
+								done = False
 
-	Side effects:
-		Reads:
-			- flagged_tiles
-
-		Modifies:
-			- checked_tiles
-	"""
-	if (position_x, position_y) not in flagged_tiles:
-		checked_tiles.add( (position_x, position_y) )
-
-	if is_bomb(position_x, position_y):
-		end_game()
+		return tile_grid
 
 
-def is_bomb(position_x: int, position_y: int) -> bool:
-	"""
-	Check if given tile is a bomb.
+	def _get_bombs_on_screen(
+		screen_position_x: int, screen_position_y: int, resolution_x: int,
+		resolution_y: int
+	) -> set:
+		"""
+		Get all bombs currently on screen.
 
-	Generates a random number from 0-1 using the seed mixed with the tile's
-	positions. This is then compared with the bomb chance, and, if the chance
-	is higher, the tile is a bomb.
+		This can be an intensive calculation, as it checks each tile if it is
+		a bomb, which requires a random number for each tile. If the screen
+		parameters have not changed since last call, simply returns a cache.
 
-	Args:
-		position_x (int): Position of the tile on the x axis. Higher values
-			go right.
-			
-		position_y (int): Position of the title on the y axis. Higher values
-			go down.
+		Returns
+			All the bombs on screen, with each bomb represented with the 
+				tuple `(x, y)`. It does not matter if the bomb is covered.
+		"""
+		if all(
+			screen_position_x == self._last_screen_position_x,
+			screen_position_y == self._last_screen_position_y,
+			resolution_x == self._last_screen_resolution_x,
+			resolution_y == self._last_screen_resolution_y
+		):
+			return self._bomb_cache
+		
+		bombs = set()
 
-	Return
-		bool: True if given tile is a bomb, False otherwise.
-	"""
-	random.seed( utils.mix_seed_with_tile(SEED, position_x, position_y) )
+		for i in range(resolution_y):
+			for v in range(resolution_x):
+				if _is_bomb(screen_position_x + v, screen_position_y + i):
+					bombs.add( (screen_position_x + v, screen_position_y + i) )
 
-	roll = random.randint(1, 100)
-	return BOMB_CHANCE >= roll
+		self._bomb_cache = bombs
+		self._last_screen_position_x = screen_position_x
+		self._last_screen_position_y = screen_position_y
+		self._last_screen_resolution_x = resolution_x
+		self._last_screen_resolution_y = resolution_y
 
-
-def get_adjacent_tile_counts(position_x: int, position_y: int) -> dict:
-	"""
-	Get the counts of the eight adjacent tiles to the tile specified.
-
-	Counts retrieved are: number of flags and number of bombs in adjacent tiles.
-
-	Args:
-		position_x (int): Position of the tile on the x axis. Higher values
-			go right.
-
-		position_y (int): Position of the tile on the y axis. Higher values
-			go down.
-
-	Returns:
-		dict: The keys (strings) are "bombs" and "flags" and the values (ints)
-			are the counts of each.
-	"""
-	count_bombs = 0
-	count_flags = 0
-
-	for i in range(-1, 2): # Range end is exclusive.
-		for v in range(-1, 2):
-			# TODO: verify this works correctly.
-			if i == 0 and v == 0:
-				continue
-
-			if is_bomb(position_x + i, position_y + v):	
-				count_bombs += 1
-
-			if (position_x + i, position_y + v) in flagged_tiles:
-				count_flags += 1
-
-	return {"bombs": count_bombs, "flags": count_flags}
+		return bombs
 
 
-def end_game() -> None:
-	"""
-	End the game as a result of revealing a bomb.
-	"""
-	pass
-				
+	def _is_bomb(self, position_x: int, position_y: int) -> bool:
+		"""
+		Check if given tile is a bomb.
+
+		Generates a random number in [0-100] using the seed mixed with the tile's
+		positions. This is then compared with the bomb chance, and, if the chance
+		is higher, the tile is a bomb.
+
+		Returns
+			Whether the tile is a bomb.
+		"""
+		random.seed(utils.mix_seed(self.SEED, position_x, position_y))
+
+		roll = random.randint(1, 100)
+		return self.BOMB_CHANCE >= roll
+
+
+	def _get_all_adjacent_bomb_counts(self, bombs: set) -> dict:
+		"""
+		Get all tiles with bombs adjacent to them.
+
+		Instead of running on every tile, this runs on every bomb given. This
+		provides a considerable speed increase, especially with a low bomb chance.
+
+		Args:
+			bombs: The bombs to use. Each bomb is represented with its position
+				as a tuple: (x, y).
+
+		Returns:
+			The keys are tiles with at least one adjacent bomb and the values
+				are the amount of adjacent bombs.
+		"""
+		bomb_counts = {}
+
+		for bomb in bombs:
+			for i in range(-1, 2):
+				for v in range(-1, 2):
+					if (bomb[0] + i, bomb[1] + v) in bombs:
+						continue
+
+					try:
+						bomb_counts[ (bomb[0] + i, bomb[1] + v) ] += 1
+
+					except KeyError:
+						bomb_counts[ (bomb[0] + i, bomb[1] + v) ] = 1
+
+		return bomb_counts
+
+
+	def _get_adjacent_bomb_count(
+		self, position_x: int, position_y: int, bombs: set
+	) -> int:
+		"""
+		Get the number of adjacent bombs to one tile.
+
+		Returns:
+			The amount of bombs that are adjacent to the given tile.
+		"""
+		bomb_count = 0
+
+		for i in range(-1, 2):
+			for v in range(-1, 2):
+				if i == 0 and v == 0:
+					continue
+
+				if (position_x + i, position_y + v) in bombs:
+					bomb_count += 1
+		
+		return bomb_count
+
+
+	def end_game(self) -> None:
+		"""End the game as a result of revealing a bomb."""
+		pass
