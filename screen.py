@@ -1,35 +1,42 @@
 """
-The screen.
+Display to the screen.
 
 Attributes:
+	Defined in config:
+		RESOLUTION_X: The amount of characters on a line.
+		RESOLUTION_Y: The amount of lines.
+		CURSOR_CHAR: The character used to display the cursor. This replaces
+			whatever tile the cursor is on.
+
+	screen_position_x: The x coordinate of the top-left tile of the screen.
+	screen_position_y: The y coordinate of the top-left tile of the screen.
+	cursor_position_x: The x coordinate of the cursor.
+	cursor_position_y: The y coordinate of the cursor.
 """
 import config
-import board
 
 RESOLUTION_X = config.RESOLUTION_X
 RESOLUTION_Y = config.RESOLUTION_Y
-
-DISPLAY_MAP = config.DISPLAY_MAP
-
 CURSOR_CHAR = config.CURSOR_CHAR
 
 screen_position_x = 0
 screen_position_y = 0
-
 cursor_position_x = 0
 cursor_position_y = 0
 
 
-def update() -> None:
+def update(board) -> None:
+	"""
+	Update the screen.
+
+	Args:
+		board: The board object to get tiles from. Must have a get_tile_grid function. 
+	"""
+	tile_grid = board.get_tile_grid(
+		screen_position_x, screen_position_y, RESOLUTION_X, RESOLUTION_Y,
+		DISPLAY_MAP
+	)
+	tile_grid[cursor_position_y][cursor_position_X] = CURSOR_CHAR
+	
 	for i in range(RESOLUTION_Y):
-		for v in range(RESOLUTION_X):
-			if v == cursor_position_x and i == cursor_position_y:
-				print(CURSOR_CHAR, end="")
-				continue
-
-			print(DISPLAY_MAP[board.get_tile_state(
-				screen_position_x + v,
-				screen_position_y + i
-			)], end="")
-
-		print()
+		print(tile_grid[i])
