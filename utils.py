@@ -1,28 +1,26 @@
+"""Various useful utility functions."""
 def clamp(value, minimum, maximum):
 	"""
 	Clamp a value between a minimum and maximum value.
 
-	Args:
-		value: Value to be clamped.
-		minimum: Minimum value allowed.
-		maximum: Maximum value allowed.
+	All args must be of the same type, though they do not need to be numbers.
 	"""
 	return sorted( (minimum, value, maximum) )[1]
 
-def mix_seed_with_tile(seed: int, position_x: int, position_y: int) -> int:
+
+def mix_seed(seed: int, *args) -> int:
 	"""
-	Given a seed and a tile's positions, generate a new, unique seed.
+	Given a seed and some other data, generate a new, unique seed.
 
 	Args:
-		seed (int): The seed before mixing.
-		position_x (int): The position of the tile on the x-axis.
-		position_y (int): The position of the tile on the y-axis.
+		seed: The seed before mixing.
+		*args: Any amount of data.
 
 	Returns:
-		int: The new mixed seed.
+		The new mixed seed.
 	"""
 	
-	seed_str = str(seed) + str(position_x) + str(position_y)
+	seed_str = str(seed) + str(args)
 	
 	return hash(seed_str)
 	
