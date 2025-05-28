@@ -7,6 +7,7 @@ Attributes:
         RESOLUTION_Y: The amount of lines.
         CURSOR_CHAR: The character used to display the cursor. This replaces
             whatever tile the cursor is on.
+        DISPLAY_MAP: The map of states to characters.
 
     screen_position_x: The x coordinate of the top-left tile of the screen.
     screen_position_y: The y coordinate of the top-left tile of the screen.
@@ -18,6 +19,7 @@ import config
 RESOLUTION_X = config.RESOLUTION_X
 RESOLUTION_Y = config.RESOLUTION_Y
 CURSOR_CHAR = config.CURSOR_CHAR
+DISPLAY_MAP = config.DISPLAY_MAP
 
 screen_position_x = 0
 screen_position_y = 0
