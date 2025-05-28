@@ -202,12 +202,12 @@ class Board:
             All the bombs on screen, with each bomb represented with the 
                 tuple `(x, y)`. It does not matter if the bomb is covered.
         """
-        if all(
+        if all([
             screen_position_x == self._last_screen_position_x,
             screen_position_y == self._last_screen_position_y,
             resolution_x == self._last_screen_resolution_x,
             resolution_y == self._last_screen_resolution_y
-        ):
+        ]):
             return self._bomb_cache
         
         bombs = set()
