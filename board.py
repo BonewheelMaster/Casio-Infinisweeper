@@ -188,7 +188,7 @@ class Board:
 
 
     def _get_bombs_on_screen(
-        screen_position_x: int, screen_position_y: int, resolution_x: int,
+        self, screen_position_x: int, screen_position_y: int, resolution_x: int,
         resolution_y: int
     ) -> set:
         """
