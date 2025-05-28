@@ -56,7 +56,7 @@ class Board:
 
 
     def get_tile_grid(
-        screen_position_x: int, screen_position_y: int, resolution_x: int,
+        self, screen_position_x: int, screen_position_y: int, resolution_x: int,
         resolution_y: int, display_map: dict
     ) -> list:
         """
