@@ -74,8 +74,9 @@ class Board:
                 the tile (x, y), use something like `tile_grid[y][x]`.
         """
         tile_grid = [
-            [display_map[("hidden")] * resolution_x] * resolution_y
-        ]
+            [display_map[("hidden")] * resolution_x]
+        ] * resolution_y
+
         bombs = self._get_bombs_on_screen(
             screen_position_x, screen_position_y, resolution_x, resolution_y
         )
