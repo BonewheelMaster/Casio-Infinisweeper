@@ -79,7 +79,7 @@ class Board:
         bombs = self._get_bombs_on_screen(
             screen_position_x, screen_position_y, resolution_x, resolution_y
         )
-        nonzero_tiles = self_get_all_adjacent_bomb_counts(bombs)
+        nonzero_tiles = self._get_all_adjacent_bomb_counts(bombs)
 
         for tile in self._checked_tiles:
             if tile in nonzero_tiles:
@@ -101,7 +101,7 @@ class Board:
             for tile in bombs:
                 tile_grid[tile[1]][tile[0]] = display_map["bomb"]
 
-        tile_grid = self_auto_check_tiles(tile_grid, nonzero_tiles, display_map)
+        tile_grid = self._auto_check_tiles(tile_grid, nonzero_tiles, display_map)
 
         return tile_grid
 
@@ -214,7 +214,7 @@ class Board:
 
         for i in range(resolution_y):
             for v in range(resolution_x):
-                if _is_bomb(screen_position_x + v, screen_position_y + i):
+                if self._is_bomb(screen_position_x + v, screen_position_y + i):
                     bombs.add( (screen_position_x + v, screen_position_y + i) )
 
         self._bomb_cache = bombs
