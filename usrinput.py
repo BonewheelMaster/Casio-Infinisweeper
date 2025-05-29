@@ -7,9 +7,26 @@ Attributes:
 """
 import screen
 import utils
-import config
 
-INPUT_MAP = config.INPUT_MAP
+INPUT_MAP = {
+    "4": lambda board: move(-1, 0),
+    "8": lambda board: move(0, -1),
+    "6": lambda board: move(1, 0),
+    "2": lambda board: move(0, 1),
+    "1": lambda board: move(-1, 1),
+    "7": lambda board: move(-1, -1),
+    "9": lambda board: move(1, -1),
+    "3": lambda board: move(1, 1),
+    "5": lambda board: board.flag_tile(
+        screen.screen_position_x + screen.cursor_position_x,
+        screen.screen_position_y + screen.cursor_position_y
+    ),
+    "0": lambda board: board.check_tile(
+        screen.screen_position_x + screen.cursor_position_x,
+        screen.screen_position_y + screen.cursor_position_y
+    ),
+    ".": lambda board: toggle_movement_mode(),
+}
 
 # Move the screen instead of the cursor if True. Modified
 # by the toggle_movement_mode function.
