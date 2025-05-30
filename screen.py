@@ -41,4 +41,4 @@ def update(board) -> None:
     tile_grid[cursor_position_y][cursor_position_x] = CURSOR_CHAR
     
     for i in range(RESOLUTION_Y):
-        print(tile_grid[i])
+        print(*tile_grid[i], sep="")
