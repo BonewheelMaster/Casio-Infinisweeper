@@ -73,7 +73,10 @@ class Board:
                 on those rows are the columns (x). This means that to access
                 the tile (x, y), use something like `tile_grid[y][x]`.
         """
-        tile_grid = [["?" for _ in range(resolution_x)] for _ in range(resolution_y)]
+        tile_grid = [
+            [DISPLAY_MAP["hidden"] for _ in range(resolution_x)]
+                for _ in range(resolution_y)
+        ]
 
         bombs = self._get_bombs_on_screen(
             screen_position_x, screen_position_y, resolution_x, resolution_y
