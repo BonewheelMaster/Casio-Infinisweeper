@@ -29,3 +29,7 @@ will move the cursor or screen three tiles left and two tiles up.
 
 The `config.py` file contains various configuration variables; further 
 configuration requires editing the source code.
+
+## Installation
+
+See [INSTALL.md](INSTALL.md)
