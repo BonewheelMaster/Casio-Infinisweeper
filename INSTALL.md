@@ -6,7 +6,7 @@ You will need a USB-Mini-B (Not Micro-B) cable:
 
 and enough space on the calculator's storage memory (this model has ~3 MB; this
 project takes ~20 KB). Connect the calculator to the device with this project 
-and open the calculator as you would open a flash drive. Then copy the src 
+and open the calculator as you would open a flash drive. Then copy the `src` 
 directory of this project to the root of the calculator (outside of `@MAINMEM`).
 
 # To other calculators
