@@ -12,5 +12,5 @@ while True:
         screen.screen_position_x, screen.screen_position_y, screen.RESOLUTION_X,
         screen.RESOLUTION_Y, screen.DISPLAY_MAP
     )
-    screen.update(tile_grid)
+    screen.update(tile_grid, True)
     usrinput.take_input(game_board)
