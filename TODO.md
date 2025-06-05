@@ -2,3 +2,4 @@
 - Add event when a bomb is uncovered.
 - Add saving/loading.
 - Add screen absolute movement.
+- Add help screen viewable on runtime.
