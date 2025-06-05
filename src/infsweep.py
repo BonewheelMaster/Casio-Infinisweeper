@@ -8,5 +8,9 @@ game_board = board.Board(
 )
 
 while True:
-    screen.update(game_board)
+    tile_grid = game_board.get_tile_grid(
+        screen.screen_position_x, screen.screen_position_y, screen.RESOLUTION_X,
+        screen.RESOLUTION_Y, screen.DISPLAY_MAP
+    )
+    screen.update(tile_grid)
     usrinput.take_input(game_board)

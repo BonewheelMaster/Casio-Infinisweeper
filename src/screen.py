@@ -27,18 +27,18 @@ cursor_position_x = 0
 cursor_position_y = 0
 
 
-def update(board) -> None:
+def update(tile_grid: list, display_cursor: bool) -> None:
     """
     Update the screen.
 
     Args:
-        board: The board object to get tiles from. Must have a get_tile_grid function. 
+        tile_grid: The grid of tiles to display. Must contain a number of lists
+            equal to this module's RESOLUTION_Y, and each list must be composed
+            of a number of single characters equal to this module's RESOLUTION_X.
+        display_cursor: Whether to display the cursor.
     """
-    tile_grid = board.get_tile_grid(
-        screen_position_x, screen_position_y, RESOLUTION_X, RESOLUTION_Y,
-        DISPLAY_MAP
-    )
-    tile_grid[cursor_position_y][cursor_position_x] = CURSOR_CHAR
+    if display_cursor:
+        tile_grid[cursor_position_y][cursor_position_x] = CURSOR_CHAR
     
     for i in range(RESOLUTION_Y):
         print(*tile_grid[i], sep="")
