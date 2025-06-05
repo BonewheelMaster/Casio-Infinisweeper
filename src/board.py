@@ -20,7 +20,6 @@ class Board:
         BOMB_CHANCE (int): The chance for any given tile to be a bomb.
         AUTO_UNCOVER_TILES (bool): Whether the board automatically uncovers
             all tiles around a tile with no adjacent bombs.
-
         game_ended (bool): If the game has ended. If True, all tiles
             are revealed.
     """
@@ -74,7 +73,7 @@ class Board:
                 the tile (x, y), use something like `tile_grid[y][x]`.
         """
         tile_grid = [
-            [DISPLAY_MAP["hidden"] for _ in range(resolution_x)]
+            [display_map["hidden"] for _ in range(resolution_x)]
                 for _ in range(resolution_y)
         ]
 
