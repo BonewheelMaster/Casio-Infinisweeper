@@ -82,25 +82,27 @@ class Board:
         )
         nonzero_tiles = self._get_all_adjacent_bomb_counts(bombs)
 
-        for tile in self._checked_tiles:
-            if tile in nonzero_tiles:
-                tile_grid[tile[1]][tile[0]] = display_map[
-                    "checked: {}".format(nonzero_tiles[tile])
-                ]
+        for v in range(resolution_y):
+            for i in range(resolution_x):
+                if (i, v) in self._flagged_tiles:
+                    # If tile is in flagged tiles, it is not in checked tiles.
+                    tile_grid[v][i] = display_map["flagged"]
+                    continue
 
-            elif tile in bombs:
-                tile_grid[tile[1]][tile[0]] = display_map["bomb"]
+                if (i, v) not in self._checked_tiles and not self.game_ended:
+                    continue
 
-            else:
-                tile_grid[tile[1]][tile[0]] = display_map["safe"]
+                if (i, v) in nonzero_tiles:
+                    tile_grid[v][i] = display_map[
+                        "checked: {}".format(nonzero_tiles[(i, v)])
+                    ]
+                    continue
 
-        for tile in self._flagged_tiles:
-            tile_grid[tile[1]][tile[0]] = display_map["flagged"]
+                if (i, v) not in bombs:
+                    tile_grid[v][i] = display_map["safe"]
+                    continue
 
-        if self.game_ended:
-            # Reveal all bombs, regardless of if they have been checked.
-            for tile in bombs:
-                tile_grid[tile[1]][tile[0]] = display_map["bomb"]
+                tile_grid[v][i] = display_map["bomb"]
 
         tile_grid = self._auto_check_tiles(tile_grid, nonzero_tiles, display_map)
 
