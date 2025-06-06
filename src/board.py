@@ -76,7 +76,6 @@ class Board:
             [display_map["hidden"] for _ in range(resolution_x)]
                 for _ in range(resolution_y)
         ]
-
         bombs = self._get_bombs_on_screen(
             screen_position_x, screen_position_y, resolution_x, resolution_y
         )
