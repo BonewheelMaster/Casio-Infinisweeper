@@ -7,6 +7,7 @@ Attributes:
 """
 import screen
 import utils
+import helpmenu
 
 INPUT_MAP = {
     "4": lambda board: move(-1, 0),
@@ -26,6 +27,7 @@ INPUT_MAP = {
         screen.screen_position_y + screen.cursor_position_y
     ),
     ".": lambda board: toggle_movement_mode(),
+    "-": lambda board: helpmenu.start()
 }
 
 # Move the screen instead of the cursor if True. Modified
