@@ -83,21 +83,23 @@ class Board:
 
         for v in range(resolution_y):
             for i in range(resolution_x):
-                if (i, v) in self._flagged_tiles:
+                tile = (screen_position_x + i, screen_position_y + v)
+
+                if tile in self._flagged_tiles:
                     # If tile is in flagged tiles, it is not in checked tiles.
                     tile_grid[v][i] = display_map["flagged"]
                     continue
 
-                if (i, v) not in self._checked_tiles and not self.game_ended:
+                if tile not in self._checked_tiles and not self.game_ended:
                     continue
 
-                if (i, v) in nonzero_tiles:
+                if tile in nonzero_tiles:
                     tile_grid[v][i] = display_map[
-                        "checked: {}".format(nonzero_tiles[(i, v)])
+                        "checked: {}".format(nonzero_tiles[tile])
                     ]
                     continue
 
-                if (i, v) not in bombs:
+                if tile not in bombs:
                     tile_grid[v][i] = display_map["safe"]
                     continue
 
