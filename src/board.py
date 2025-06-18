@@ -105,8 +105,6 @@ class Board:
 
                 tile_grid[v][i] = display_map["bomb"]
 
-        tile_grid = self._auto_check_tiles(tile_grid, nonzero_tiles, display_map)
-
         return tile_grid
 
 
@@ -133,62 +131,16 @@ class Board:
 
         self._checked_tiles.add( (position_x, position_y) )
 
-        if (position_x, position_y) in self._bomb_cache:
+        if self._is_bomb(position_x, position_y):
             self.end_game()
+            return
+
+        if self._get_adjacent_bomb_count(position_x, position_y) == 0:
+            self._auto_check_tiles(position_x, position_y)
 
 
-    # def _auto_check_tiles(self, position_x: int, position_y: int) -> None:
-    #     """
-    #     Uncover every tile adjacent to a safe tile.
-
-    #     Called when a tile is checked by the user and has 0 bombs around it.
-    #     """
-    #     if not self.AUTO_UNCOVER_TILES:
-    #         return
-
-    #     for i in range(-1, 2):
-    #         for v in range(-1, 2):
-    #             if (position_x + i, position_y + v) in self._checked_tiles:
-    #                 continue
-                    
-    #             self._checked_tiles.add(position_x + i, position_y + v)
-
-
-    def _auto_check_tiles(
-            self, tile_grid: list, nonzero_tiles: list, display_map: dict
-    ) -> list:
-        """
-        Automatically uncover all tiles around an uncovered safe tile.
-
-        Args:
-            tile_grid: The tile grid to modify.
-            nonzero_tiles: All tiles on the grid that aren't safe (not including bombs).
-            display_map: The map of states to characters.
-
-        Returns:
-            The new tile grid.
-        """
-        # TODO: Consider using recursion.
-        done = False
-
-        # This is horrid. TODO: Make this better.
-        # TODO: Check performance.
-        while not done:
-            done = True
-            
-            for row in tile_grid:
-                for tile in row:
-                    if tile != display_map["safe"]:
-                        continue
-                        
-                    for i in range(-1, 2):
-                        for v in range(-1, 2):
-                            # TODO: Confirm functionality.
-                            if tile_grid[row][tile] == display_map["hidden"]:
-                                tile_grid[row][tile] = display_map["safe"]
-                                done = False
-
-        return tile_grid
+    def _auto_check_tiles(self, position_x: int, position_y: int) -> None:
+        return
 
 
     def _get_bombs_on_screen(
@@ -280,7 +232,7 @@ class Board:
 
 
     def _get_adjacent_bomb_count(
-        self, position_x: int, position_y: int, bombs: set
+        self, position_x: int, position_y: int
     ) -> int:
         """
         Get the number of adjacent bombs to one tile.
@@ -295,7 +247,7 @@ class Board:
                 if i == 0 and v == 0:
                     continue
 
-                if (position_x + i, position_y + v) in bombs:
+                if self._is_bomb(position_x + i, position_y + v):
                     bomb_count += 1
         
         return bomb_count
