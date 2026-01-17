@@ -1,3 +1,5 @@
+Abandoned
+
 # Casio Infinisweeper
 
 An endless minesweeper game built for the Casio fx-9750GIII (might work for other
